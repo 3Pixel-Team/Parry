@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterStats : MonoBehaviour
+
+public class CharacterStats : MonoBehaviour, IDamageable
 {
     public int health = 100;
     public int maxHealth = 100;
@@ -17,5 +18,20 @@ public class CharacterStats : MonoBehaviour
     void Update()
     {
         
+    }
+
+    // TakedDamage removes the given amount of health to a character
+    // after checking if the new value isn't negative
+    public void TakeDamage(int amount) 
+    {
+        int newValue = health - amount;
+        if (newValue < 0 ) 
+        {
+            health = 0;
+        }
+        else 
+        {
+            health = newValue;
+        }
     }
 }
