@@ -9,17 +9,21 @@ public class CharacterController : MonoBehaviour
     private int extraJump;
     public int extraJumpValue;
     public float raydist = 0.1f;
-     float maxVel = 5f;
+    public float maxVel = 5f;
+    
+
 
    public bool grounded;
     bool falling;
     bool isFaceingRight = true;
+    public bool jump;
 
     public Rigidbody2D rb;
     public Animator animator;
     GameObject groundSensor;
+    CharacterStats stats;
 
-   public LayerMask mask;
+    public LayerMask mask;
 
     RaycastHit2D hit2D;
     
@@ -28,21 +32,47 @@ public class CharacterController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        stats = GetComponent<CharacterStats>();
         groundSensor = GameObject.Find("GroundSensor");
         extraJump = extraJumpValue;
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        Jump();
-       
+        if (Input.GetButtonDown("Jump") && extraJump > 0)
+        {
+            Jump();
+        }
+        else if (Input.GetButtonDown("Jump") && extraJump == 0 && grounded == true)
+        {
+            Jump();
+        }
+
+        if(rb.velocity.y < 0)
+        {
+            animator.SetBool("SecondJump", true);
+        }
+
+        if(Input.GetButtonDown("Fire1"))
+        {
+            Attack();
+        }
     }
 
     void FixedUpdate()
     {
-       
+        if (grounded == true)
+        {
+            extraJump = extraJumpValue;
+            animator.SetBool("IsGrounded", true);
+        }
+        else if (grounded == false)
+        {
+            animator.SetBool("IsGrounded", false);
+            animator.SetBool("SecondJump", false);
+        }
 
         grounded = Physics2D.OverlapCircle(groundSensor.transform.position, raydist, mask);
         Move();
@@ -67,39 +97,33 @@ public class CharacterController : MonoBehaviour
 
     void Jump()
     {
+        rb.AddForce(new Vector2(0f, hight), ForceMode2D.Impulse);
+        extraJump--;
 
-        if (grounded == true)
-        {
-            extraJump = extraJumpValue;
-            animator.SetBool("IsGrounded" ,true);
-        }
-        else if(grounded == false)
-        {
-            animator.SetBool("IsGrounded", false);
-        }
-
-        if (Input.GetButtonDown("Jump") && extraJump > 0)
-        {
-            rb.AddForce(new Vector2(0f, hight), ForceMode2D.Impulse);
-            extraJump--;
-            
-        }
-        else if (Input.GetButtonDown("Jump") && extraJump == 0 && grounded == true)
-        {
-            rb.AddForce(new Vector2(0f, hight), ForceMode2D.Impulse);
-            
-        }
-
+        jump = true;
+       
         if (rb.velocity.y >= maxVel)
         {
             rb.velocity = new Vector2(0f,maxVel);
-        }
-        
+        }       
     }
 
     void Flip()
     {
         isFaceingRight = !isFaceingRight;
         transform.Rotate(0f, 180f, 0);
+    }
+
+    void Attack()
+    {
+        animator.SetTrigger("Attack");
+    }
+
+    public void Die()
+    {
+        if(stats.health <= 0)
+        {
+            //Die
+        }
     }
 }
